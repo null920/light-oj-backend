@@ -1,6 +1,6 @@
-package ${packageName}.model.dto.${dataKey};
+package com.light.oj.model.dto.question;
 
-import ${packageName}.common.PageRequest;
+import com.light.oj.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,44 +8,34 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 查询${dataName}请求
- *
- *
- *
+ * 查询请求
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ${upperDataKey}QueryRequest extends PageRequest implements Serializable {
-
+public class QuestionQueryRequest extends PageRequest implements Serializable {
     /**
      * id
      */
     private Long id;
-
     /**
-     * id
-     */
-    private Long notId;
-
-    /**
-     * 搜索词
-     */
-    private String searchText;
-
-    /**
-     * 标题
+     * 题目标题
      */
     private String title;
 
     /**
-     * 内容
+     * 题目内容
      */
     private String content;
 
     /**
-     * 标签列表
+     * 标签列表（JSON 数组）
      */
     private List<String> tags;
+
+    /**
+     * 题目答案
+     */
+    private String answer;
 
     /**
      * 创建用户 id

@@ -21,6 +21,7 @@ import com.light.oj.model.vo.UserVO;
 import com.light.oj.service.PostService;
 import com.light.oj.service.UserService;
 import com.light.oj.utils.SqlUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
 import lombok.extern.slf4j.Slf4j;
 import cn.hutool.core.collection.CollUtil;
 import org.apache.commons.lang3.ObjectUtils;
@@ -48,9 +50,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * 帖子服务实现
- *
- * 
- * 
  */
 @Service
 @Slf4j
