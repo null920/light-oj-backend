@@ -1,6 +1,8 @@
 package com.light.oj.model.dto.questionsubmit;
 
+import com.light.oj.common.PageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -9,10 +11,10 @@ import java.io.Serializable;
  * @Date 2024/6/16 19:24
  */
 @Data
-public class QuestionSubmitAddRequest implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class QuestionSubmitQueryRequest extends PageRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
     /**
      * 编程语言
      */
@@ -23,10 +25,14 @@ public class QuestionSubmitAddRequest implements Serializable {
      */
     private Long questionId;
 
+    /**
+     * 用户 id
+     */
+    private Long userId;
 
     /**
-     * 用户代码
+     * 提交状态
      */
-    private String code;
+    private Integer status;
 
 }

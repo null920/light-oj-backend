@@ -1,11 +1,15 @@
 package com.light.oj.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.light.oj.common.BaseResponse;
 import com.light.oj.common.ErrorCode;
 import com.light.oj.common.ResultUtils;
 import com.light.oj.exception.BusinessException;
 import com.light.oj.model.dto.questionsubmit.QuestionSubmitAddRequest;
+import com.light.oj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
+import com.light.oj.model.entity.QuestionSubmit;
 import com.light.oj.model.entity.User;
+import com.light.oj.model.vo.QuestionSubmitVO;
 import com.light.oj.service.QuestionSubmitService;
 import com.light.oj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,21 +38,37 @@ public class QuestionSubmitController {
     /**
      * 提交题目
      *
-     * @param questionSubmitAddRequest
-     * @param request
-     * @return resultNum 本次点赞变化数
+     * @param questionSubmitAddRequest 请求封装类
+     * @param request                  请求
+     * @return 题目提交 id
      */
     @PostMapping("/")
-    public BaseResponse<Integer> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
-                                                  HttpServletRequest request) {
+    public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
+                                               HttpServletRequest request) {
         if (questionSubmitAddRequest == null || questionSubmitAddRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 登录才能点赞
+        // 登录才能提交
         final User loginUser = userService.getLoginUser(request);
-        long questionId = questionSubmitAddRequest.getQuestionId();
-        int result = questionSubmitService.doQuestionSubmit(questionId, loginUser);
-        return ResultUtils.success(result);
+        long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
+        return ResultUtils.success(questionSubmitId);
+    }
+
+
+    /**
+     * 分页获取题目提交列表（除了管理员，普通用户只能看到公开信息）
+     *
+     * @param questionSubmitQueryRequest 请求封装类
+     * @return
+     */
+    @PostMapping("/list/page")
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest, HttpServletRequest request) {
+        final User loginUser = userService.getLoginUser(request);
+        long current = questionSubmitQueryRequest.getCurrent();
+        long size = questionSubmitQueryRequest.getPageSize();
+        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
+                questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
+        return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, request));
     }
 
 }

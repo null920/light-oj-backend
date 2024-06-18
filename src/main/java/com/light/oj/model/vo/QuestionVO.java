@@ -79,7 +79,7 @@ public class QuestionVO implements Serializable {
     /**
      * 题目创建人的信息
      */
-    private UserVO userVO;
+    private UserVO creatorUserVO;
 
     /**
      * 包装类转对象

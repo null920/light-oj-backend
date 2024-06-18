@@ -1,7 +1,5 @@
 package com.light.oj.service.impl;
 
-import java.util.Date;
-
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,12 +20,10 @@ import com.light.oj.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +59,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         String judgeCase = question.getJudgeCase();
         // 创建时，参数不能为空
         if (add) {
-            ThrowUtils.throwIf(StringUtils.isAnyBlank(title, content, tags), ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(StringUtils.isAnyBlank(title, content, tags, judgeConfig, judgeCase), ErrorCode.PARAMS_ERROR);
         }
         // 有参数则校验
         if (StringUtils.isNotBlank(title) && title.length() > 80) {
@@ -100,7 +96,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         String content = questionQueryRequest.getContent();
         List<String> tags = questionQueryRequest.getTags();
         String answer = questionQueryRequest.getAnswer();
-        String userId = questionQueryRequest.getUserId();
+        Long userId = questionQueryRequest.getUserId();
         String sortField = questionQueryRequest.getSortField();
         String sortOrder = questionQueryRequest.getSortOrder();
 
@@ -120,6 +116,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         return queryWrapper;
     }
 
+
     @Override
     public QuestionVO getQuestionVO(Question question, HttpServletRequest request) {
         QuestionVO questionVO = QuestionVO.objToVo(question);
@@ -130,7 +127,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             user = userService.getById(userId);
         }
         UserVO userVO = userService.getUserVO(user);
-        questionVO.setUserVO(userVO);
+        questionVO.setCreatorUserVO(userVO);
         return questionVO;
     }
 
@@ -154,7 +151,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            questionVO.setUserVO(userService.getUserVO(user));
+            questionVO.setCreatorUserVO(userService.getUserVO(user));
             return questionVO;
         }).collect(Collectors.toList());
         questionVOPage.setRecords(questionVOList);

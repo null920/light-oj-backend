@@ -1,6 +1,7 @@
 package com.light.oj.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,7 +18,7 @@ public class QuestionSubmit implements Serializable {
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -48,7 +49,7 @@ public class QuestionSubmit implements Serializable {
     /**
      * 判题状态（0-待判题 1-判题中 2-成功 3-失败）
      */
-    private String status;
+    private Integer status;
 
     /**
      * 创建时间

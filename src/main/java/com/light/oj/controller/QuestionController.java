@@ -10,10 +10,7 @@ import com.light.oj.common.ResultUtils;
 import com.light.oj.constant.UserConstant;
 import com.light.oj.exception.BusinessException;
 import com.light.oj.exception.ThrowUtils;
-import com.light.oj.model.dto.question.QuestionAddRequest;
-import com.light.oj.model.dto.question.QuestionEditRequest;
-import com.light.oj.model.dto.question.QuestionQueryRequest;
-import com.light.oj.model.dto.question.QuestionUpdateRequest;
+import com.light.oj.model.dto.question.*;
 import com.light.oj.model.entity.Question;
 import com.light.oj.model.entity.User;
 import com.light.oj.model.vo.QuestionVO;
@@ -58,8 +55,16 @@ public class QuestionController {
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
         List<String> tags = questionAddRequest.getTags();
+        JudgeConfig judgeConfig = questionAddRequest.getJudgeConfig();
+        List<JudgeCase> judgeCase = questionAddRequest.getJudgeCase();
         if (tags != null) {
             question.setTags(JSONUtil.toJsonStr(tags));
+        }
+        if (judgeConfig != null) {
+            question.setJudgeConfig(JSONUtil.toJsonStr(judgeConfig));
+        }
+        if (judgeCase != null) {
+            question.setJudgeCase(JSONUtil.toJsonStr(judgeCase));
         }
         questionService.validQuestion(question, true);
         User loginUser = userService.getLoginUser(request);
@@ -112,8 +117,16 @@ public class QuestionController {
         Question question = new Question();
         BeanUtils.copyProperties(questionUpdateRequest, question);
         List<String> tags = questionUpdateRequest.getTags();
+        JudgeConfig judgeConfig = questionUpdateRequest.getJudgeConfig();
+        List<JudgeCase> judgeCase = questionUpdateRequest.getJudgeCase();
         if (tags != null) {
             question.setTags(JSONUtil.toJsonStr(tags));
+        }
+        if (judgeConfig != null) {
+            question.setJudgeConfig(JSONUtil.toJsonStr(judgeConfig));
+        }
+        if (judgeCase != null) {
+            question.setJudgeCase(JSONUtil.toJsonStr(judgeCase));
         }
         // 参数校验
         questionService.validQuestion(question, false);
@@ -144,7 +157,7 @@ public class QuestionController {
     }
 
     /**
-     * 分页获取列表（仅管理员）
+     * 分页获取题目列表（仅管理员）
      *
      * @param questionQueryRequest
      * @return
@@ -160,7 +173,7 @@ public class QuestionController {
     }
 
     /**
-     * 分页获取列表（封装类）
+     * 分页获取题目列表（封装类）
      *
      * @param questionQueryRequest
      * @param request
@@ -218,8 +231,16 @@ public class QuestionController {
         Question question = new Question();
         BeanUtils.copyProperties(questionEditRequest, question);
         List<String> tags = questionEditRequest.getTags();
+        JudgeConfig judgeConfig = questionEditRequest.getJudgeConfig();
+        List<JudgeCase> judgeCase = questionEditRequest.getJudgeCase();
         if (tags != null) {
             question.setTags(JSONUtil.toJsonStr(tags));
+        }
+        if (judgeConfig != null) {
+            question.setJudgeConfig(JSONUtil.toJsonStr(judgeConfig));
+        }
+        if (judgeCase != null) {
+            question.setJudgeCase(JSONUtil.toJsonStr(judgeCase));
         }
         // 参数校验
         questionService.validQuestion(question, false);

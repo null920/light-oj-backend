@@ -1,23 +1,32 @@
 package com.light.oj.model.enums;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ObjectUtils;
-
 /**
- * 文件上传业务类型枚举
+ * 判题信息枚举
  */
-public enum FileUploadBizEnum {
+public enum JudgeInfoMessageEnum {
 
-    USER_AVATAR("用户头像", "user_avatar");
+    ACCEPTED("成功", "Accepted"),
+    WRONG_ANSWER("答案错误", "Wrong Answer"),
+    COMPILE_ERROR("编译错误", "Compile Error"),
+    RUNTIME_ERROR("运行错误", "Runtime Error"),
+    TIME_LIMIT_EXCEEDED("超时错误", "Time Limit Exceeded"),
+    MEMORY_LIMIT_EXCEEDED("内存溢出", "Memory Limit Exceeded"),
+    OUTPUT_LIMIT_EXCEEDED("输出溢出", "Output Limit Exceeded"),
+    DANGEROUS_OPERATION("危险操作", "Dangerous Operation"),
+    PRESENTATION_ERROR("展示错误", "Presentation Error"),
+    SYSTEM_ERROR("系统错误", "System Error");
 
     private final String text;
 
     private final String value;
 
-    FileUploadBizEnum(String text, String value) {
+    JudgeInfoMessageEnum(String text, String value) {
         this.text = text;
         this.value = value;
     }
@@ -37,11 +46,11 @@ public enum FileUploadBizEnum {
      * @param value
      * @return
      */
-    public static FileUploadBizEnum getEnumByValue(String value) {
+    public static JudgeInfoMessageEnum getEnumByValue(String value) {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (FileUploadBizEnum anEnum : FileUploadBizEnum.values()) {
+        for (JudgeInfoMessageEnum anEnum : JudgeInfoMessageEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }
