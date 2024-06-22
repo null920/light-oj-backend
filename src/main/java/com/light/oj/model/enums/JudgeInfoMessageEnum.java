@@ -13,6 +13,7 @@ public enum JudgeInfoMessageEnum {
 
     ACCEPTED("成功", "Accepted"),
     WRONG_ANSWER("答案错误", "Wrong Answer"),
+    WAITING("等待中", "Waiting"),
     COMPILE_ERROR("编译错误", "Compile Error"),
     RUNTIME_ERROR("运行错误", "Runtime Error"),
     TIME_LIMIT_EXCEEDED("超时错误", "Time Limit Exceeded"),

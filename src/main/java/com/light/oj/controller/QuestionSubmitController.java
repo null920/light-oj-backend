@@ -51,6 +51,7 @@ public class QuestionSubmitController {
         // 登录才能提交
         final User loginUser = userService.getLoginUser(request);
         long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
+        // 执行判题服务
         return ResultUtils.success(questionSubmitId);
     }
 
