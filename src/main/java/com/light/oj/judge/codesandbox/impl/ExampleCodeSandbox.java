@@ -3,7 +3,7 @@ package com.light.oj.judge.codesandbox.impl;
 import com.light.oj.judge.codesandbox.CodeSandbox;
 import com.light.oj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.light.oj.judge.codesandbox.model.ExecuteCodeResponse;
-import com.light.oj.model.dto.questionsubmit.JudgeInfo;
+import com.light.oj.judge.codesandbox.model.JudgeInfo;
 import com.light.oj.model.enums.JudgeInfoMessageEnum;
 import com.light.oj.model.enums.QuestionSubmitStatusEnum;
 

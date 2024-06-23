@@ -5,6 +5,7 @@ import com.light.oj.common.BaseResponse;
 import com.light.oj.common.ErrorCode;
 import com.light.oj.common.ResultUtils;
 import com.light.oj.exception.BusinessException;
+import com.light.oj.judge.JudgeService;
 import com.light.oj.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.light.oj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
 import com.light.oj.model.entity.QuestionSubmit;
@@ -13,6 +14,7 @@ import com.light.oj.model.vo.QuestionSubmitVO;
 import com.light.oj.service.QuestionSubmitService;
 import com.light.oj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 题目提交接口
@@ -34,6 +37,10 @@ public class QuestionSubmitController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    @Lazy
+    private JudgeService judgeService;
 
     /**
      * 提交题目
@@ -52,6 +59,7 @@ public class QuestionSubmitController {
         final User loginUser = userService.getLoginUser(request);
         long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
         // 执行判题服务
+        CompletableFuture.runAsync(() -> judgeService.doJudge(questionSubmitId));
         return ResultUtils.success(questionSubmitId);
     }
 

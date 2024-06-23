@@ -8,14 +8,12 @@ import com.light.oj.judge.codesandbox.CodeSandboxFactory;
 import com.light.oj.judge.codesandbox.CodeSandboxProxy;
 import com.light.oj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.light.oj.judge.codesandbox.model.ExecuteCodeResponse;
+import com.light.oj.judge.strategy.JudgeContext;
 import com.light.oj.model.dto.question.JudgeCase;
-import com.light.oj.model.dto.question.JudgeConfig;
-import com.light.oj.model.dto.questionsubmit.JudgeInfo;
+import com.light.oj.judge.codesandbox.model.JudgeInfo;
 import com.light.oj.model.entity.Question;
 import com.light.oj.model.entity.QuestionSubmit;
-import com.light.oj.model.enums.JudgeInfoMessageEnum;
 import com.light.oj.model.enums.QuestionSubmitStatusEnum;
-import com.light.oj.model.vo.QuestionSubmitVO;
 import com.light.oj.service.QuestionService;
 import com.light.oj.service.QuestionSubmitService;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,11 +38,14 @@ public class JudgeServiceImpl implements JudgeService {
     @Resource
     private QuestionSubmitService questionSubmitService;
 
+    @Resource
+    private JudgeManager judgeManager;
+
     @Value("${codesandbox.type}")
     private String type;
 
     @Override
-    public QuestionSubmitVO doJudge(long questionSubmitId) {
+    public QuestionSubmit doJudge(long questionSubmitId) {
         // 根据传入的题目提交 id 获取题目的提交，并且判断题目是否存在
         QuestionSubmit questionSubmit = questionSubmitService.getById(questionSubmitId);
         if (questionSubmit == null) {
@@ -84,37 +85,24 @@ public class JudgeServiceImpl implements JudgeService {
                 .build();
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
         // 根据沙箱的执行结果，设置题目的判题状态和信息
-        List<String> outputList = executeCodeResponse.getOutputList();
-        JudgeInfoMessageEnum judgeInfoMessageEnum = JudgeInfoMessageEnum.WAITING;
-        // 判断题目答案是否正确
-        if (outputList == null || outputList.size() != inputList.size()) {
-            judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
-            return null;
-        }
-        for (int i = 0; i < judgeCaseList.size(); i++) {
-            JudgeCase tempCase = judgeCaseList.get(i);
-            if (!tempCase.getOutput().equals(outputList.get(i))) {
-                judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
-                break;
-            }
-        }
-        // 题目限制判断
-        JudgeInfo judgeInfo = executeCodeResponse.getJudgeInfo();
-        Long time = judgeInfo.getTime();
-        Long memory = judgeInfo.getMemory();
-        String judgeConfigStr = question.getJudgeConfig();
-        JudgeConfig judgeConfig = JSONUtil.toBean(judgeConfigStr, JudgeConfig.class);
-        Long needMemoryLimit = judgeConfig.getMemoryLimit();
-        Long needTimeLimit = judgeConfig.getTimeLimit();
-        if (time > needTimeLimit) {
-            judgeInfoMessageEnum = JudgeInfoMessageEnum.TIME_LIMIT_EXCEEDED;
-            return null;
-        }
-        if (memory > needMemoryLimit) {
-            judgeInfoMessageEnum = JudgeInfoMessageEnum.MEMORY_LIMIT_EXCEEDED;
-            return null;
-        }
+        JudgeContext judgeContext = new JudgeContext();
+        judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
+        judgeContext.setJudgeCaseList(judgeCaseList);
+        judgeContext.setQuestion(question);
+        judgeContext.setInputList(inputList);
+        judgeContext.setOutputList(executeCodeResponse.getOutputList());
+        judgeContext.setQuestionSubmit(questionSubmit);
+        JudgeInfo judgeInfoResponse = judgeManager.doJudge(judgeContext);
 
-        return null;
+        // 修改数据库中的判题结果
+        questionSubmitUpdate = new QuestionSubmit();
+        questionSubmitUpdate.setId(questionSubmitId);
+        questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.SUCCESS.getValue());
+        questionSubmitUpdate.setJudgeInfo(JSONUtil.toJsonStr(judgeInfoResponse));
+        boolean res = questionSubmitService.updateById(questionSubmitUpdate);
+        if (!res) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新题目提交状态失败");
+        }
+        return questionSubmitService.getById(questionSubmitId);
     }
 }

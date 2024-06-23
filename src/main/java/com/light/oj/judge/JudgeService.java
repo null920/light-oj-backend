@@ -1,6 +1,6 @@
 package com.light.oj.judge;
 
-import com.light.oj.model.vo.QuestionSubmitVO;
+import com.light.oj.model.entity.QuestionSubmit;
 
 /**
  * 判题服务
@@ -16,5 +16,5 @@ public interface JudgeService {
      * @param questionSubmitId 题目提交id
      * @return
      */
-    QuestionSubmitVO doJudge(long questionSubmitId);
+    QuestionSubmit doJudge(long questionSubmitId);
 }
