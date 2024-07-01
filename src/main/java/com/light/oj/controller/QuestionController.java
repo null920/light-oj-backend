@@ -10,19 +10,27 @@ import com.light.oj.common.ResultUtils;
 import com.light.oj.constant.UserConstant;
 import com.light.oj.exception.BusinessException;
 import com.light.oj.exception.ThrowUtils;
+import com.light.oj.judge.JudgeService;
 import com.light.oj.model.dto.question.*;
+import com.light.oj.model.dto.questionsubmit.QuestionSubmitAddRequest;
+import com.light.oj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
 import com.light.oj.model.entity.Question;
+import com.light.oj.model.entity.QuestionSubmit;
 import com.light.oj.model.entity.User;
+import com.light.oj.model.vo.QuestionSubmitVO;
 import com.light.oj.model.vo.QuestionVO;
 import com.light.oj.service.QuestionService;
+import com.light.oj.service.QuestionSubmitService;
 import com.light.oj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 题目接口
@@ -36,6 +44,11 @@ public class QuestionController {
     private QuestionService questionService;
     @Resource
     private UserService userService;
+    @Resource
+    private QuestionSubmitService questionSubmitService;
+    @Resource
+    @Lazy
+    private JudgeService judgeService;
 
     // region 增删改查
 
@@ -277,6 +290,45 @@ public class QuestionController {
         }
         boolean result = questionService.updateById(question);
         return ResultUtils.success(result);
+    }
+
+
+    /**
+     * 提交题目
+     *
+     * @param questionSubmitAddRequest 请求封装类
+     * @param request                  请求
+     * @return 题目提交 id
+     */
+    @PostMapping("/question_submit/do")
+    public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
+                                               HttpServletRequest request) {
+        if (questionSubmitAddRequest == null || questionSubmitAddRequest.getQuestionId() == null || questionSubmitAddRequest.getQuestionId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 登录才能提交
+        final User loginUser = userService.getLoginUser(request);
+        long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
+        // 执行判题服务
+        CompletableFuture.runAsync(() -> judgeService.doJudge(questionSubmitId));
+        return ResultUtils.success(questionSubmitId);
+    }
+
+
+    /**
+     * 分页获取题目提交列表（除了管理员，普通用户只能看到公开信息）
+     *
+     * @param questionSubmitQueryRequest 请求封装类
+     * @return
+     */
+    @PostMapping("/question_submit/list/page")
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest, HttpServletRequest request) {
+        final User loginUser = userService.getLoginUser(request);
+        long current = questionSubmitQueryRequest.getCurrent();
+        long size = questionSubmitQueryRequest.getPageSize();
+        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
+                questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
+        return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, request));
     }
 
 }

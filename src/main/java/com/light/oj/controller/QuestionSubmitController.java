@@ -30,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/question_submit")
 @Slf4j
+@Deprecated
 public class QuestionSubmitController {
 
     @Resource

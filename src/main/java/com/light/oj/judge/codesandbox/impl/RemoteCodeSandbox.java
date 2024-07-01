@@ -1,6 +1,7 @@
 package com.light.oj.judge.codesandbox.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.light.oj.common.ErrorCode;
@@ -17,6 +18,11 @@ import org.apache.commons.lang3.StringUtils;
  * @Date 2024/6/21 19:15
  */
 public class RemoteCodeSandbox implements CodeSandbox {
+
+    private static final String AUTH_REQUEST_HEADER = "auth";
+
+    private static final String AUTH_REQUEST_SECRET = "null920_secret_key";
+
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeRequest) {
         System.out.println("远程代码沙箱");
@@ -29,7 +35,9 @@ public class RemoteCodeSandbox implements CodeSandbox {
          * 5. 返回
          */
         String jsonStr = JSONUtil.toJsonStr(executeRequest);
+        String secretKey = SecureUtil.sha256(AUTH_REQUEST_SECRET);
         String responseStr = HttpUtil.createPost(url)
+                .header(AUTH_REQUEST_HEADER, secretKey)
                 .body(jsonStr)
                 .execute()
                 .body();
